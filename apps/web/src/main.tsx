@@ -7,6 +7,7 @@ import { Login } from './pages/Login.js'
 import { Dashboard } from './pages/Dashboard.js'
 import { MeetingDetail } from './pages/MeetingDetail.js'
 import { Settings } from './pages/Settings.js'
+import { Pricing } from './pages/Pricing.js'
 import { useAppStore } from './store/useAppStore.js'
 
 const queryClient = new QueryClient({
@@ -28,6 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/meetings/:id" element={<ProtectedRoute><MeetingDetail /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

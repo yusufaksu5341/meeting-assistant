@@ -66,6 +66,14 @@ export function Settings() {
         </section>
 
         <section className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="font-semibold text-gray-800">Plan</h2>
+            <Link to="/pricing" className="text-sm text-brand-600 hover:underline">Planları Görüntüle</Link>
+          </div>
+          <p className="text-sm text-gray-500">Mevcut planınızı ve fatura ayarlarınızı yönetin.</p>
+        </section>
+
+        <section className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="font-semibold text-gray-800 mb-4">Entegrasyonlar</h2>
           {isLoading ? (
             <p className="text-gray-400 text-sm">Yükleniyor...</p>
