@@ -17,6 +17,19 @@ await fastify.register(cors, {
   credentials: true,
 })
 
+fastify.setErrorHandler((error, _request, reply) => {
+  fastify.log.error(error)
+  const statusCode = error.statusCode ?? 500
+  return reply.status(statusCode).send({
+    error: statusCode >= 500 ? 'Sunucu hatası' : error.message,
+    ...(process.env['NODE_ENV'] !== 'production' && { stack: error.stack }),
+  })
+})
+
+fastify.setNotFoundHandler((_request, reply) => {
+  return reply.status(404).send({ error: 'Bu endpoint bulunamadı' })
+})
+
 fastify.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 
 await fastify.register(meetingsRouter, { prefix: '/api' })
