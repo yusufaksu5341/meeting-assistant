@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+
+# Prisma
+apps/api/prisma/migrations/
+
+# Build outputs
+apps/web/dist/
+apps/api/dist/

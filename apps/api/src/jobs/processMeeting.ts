@@ -5,6 +5,7 @@ import { getBotTranscript } from '../services/recall.js'
 import { analyzeMeeting } from '../services/analyzer.js'
 import { sendMeetingSummary } from '../services/slack.js'
 import { createMeetingPage } from '../services/notion.js'
+import { sendMeetingEmail } from '../services/email.js'
 
 export interface ProcessMeetingJob {
   botId: string
@@ -81,6 +82,10 @@ export const meetingWorker = new Worker<ProcessMeetingJob>(
             })
           }
         }
+
+        await sendMeetingEmail(user.email, finishedMeeting).catch((err) => {
+          console.error('[Email] Gönderilemedi:', err)
+        })
       }
     } catch (err) {
       await prisma.meeting.update({
