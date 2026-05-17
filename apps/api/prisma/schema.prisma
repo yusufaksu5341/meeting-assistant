@@ -8,13 +8,40 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String?
-  slackToken   String?
-  notionToken  String?
-  meetings     Meeting[]
-  createdAt    DateTime  @default(now())
+  id                String        @id @default(cuid())
+  email             String        @unique
+  name              String?
+  slackToken        String?
+  notionToken       String?
+  stripeCustomerId  String?       @unique
+  plan              Plan          @default(FREE)
+  meetings          Meeting[]
+  subscription      Subscription?
+  createdAt         DateTime      @default(now())
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  user                 User               @relation(fields: [userId], references: [id])
+  stripeSubscriptionId String             @unique
+  stripePriceId        String
+  status               SubscriptionStatus
+  currentPeriodEnd     DateTime
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  INCOMPLETE
 }
 
 model Meeting {

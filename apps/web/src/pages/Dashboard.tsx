@@ -11,6 +11,12 @@ async function fetchMeetings(userId: string): Promise<Meeting[]> {
   return res.json() as Promise<Meeting[]>
 }
 
+async function fetchPlan(userId: string): Promise<{ plan: 'FREE' | 'PRO' }> {
+  const res = await fetch(`/api/billing/status?userId=${userId}`)
+  if (!res.ok) return { plan: 'FREE' }
+  return res.json() as Promise<{ plan: 'FREE' | 'PRO' }>
+}
+
 export function Dashboard() {
   const user = useAppStore((s) => s.user)!
 
@@ -18,6 +24,14 @@ export function Dashboard() {
     queryKey: ['meetings', user.id],
     queryFn: () => fetchMeetings(user.id),
   })
+
+  const { data: billing } = useQuery({
+    queryKey: ['billing-status', user.id],
+    queryFn: () => fetchPlan(user.id),
+  })
+
+  const FREE_LIMIT = 5
+  const isNearLimit = billing?.plan === 'FREE' && meetings.length >= FREE_LIMIT - 1
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -30,6 +44,17 @@ export function Dashboard() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8">
+        {isNearLimit && (
+          <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-5 py-3 flex items-center justify-between">
+            <p className="text-sm text-amber-800">
+              ⚠️ Ücretsiz planda <strong>{FREE_LIMIT} toplantı</strong> limitine yaklaştınız.
+            </p>
+            <Link to="/pricing" className="text-sm font-medium text-amber-700 hover:underline shrink-0 ml-4">
+              Pro'ya Geç →
+            </Link>
+          </div>
+        )}
+
         <BotLauncher userId={user.id} onSuccess={() => refetch()} />
 
         <div className="mt-8">
