@@ -2,6 +2,7 @@ import { Queue, Worker } from 'bullmq'
 import { redis } from '../lib/redis.js'
 import { prisma } from '../lib/prisma.js'
 import { getBotTranscript } from '../services/recall.js'
+import { analyzeMeeting } from '../services/analyzer.js'
 
 export interface ProcessMeetingJob {
   botId: string
@@ -30,16 +31,29 @@ export const meetingWorker = new Worker<ProcessMeetingJob>(
 
       await prisma.meeting.update({
         where: { id: meeting.id },
+        data: { transcript, endedAt: new Date() },
+      })
+
+      const analysis = await analyzeMeeting(transcript)
+
+      await prisma.meeting.update({
+        where: { id: meeting.id },
         data: {
-          transcript,
-          endedAt: new Date(),
+          title: analysis.title,
+          summary: analysis.summary,
+          decisions: analysis.decisions,
+          status: 'DONE',
         },
       })
 
-      // Faz 2'de buraya analyzer.ts entegre edilecek
-      await prisma.meeting.update({
-        where: { id: meeting.id },
-        data: { status: 'DONE' },
+      await prisma.task.createMany({
+        data: analysis.tasks.map((t) => ({
+          meetingId: meeting.id,
+          assignee: t.assignee,
+          content: t.content,
+          deadline: t.deadline ?? undefined,
+          priority: t.priority.toUpperCase() as 'HIGH' | 'MEDIUM' | 'LOW',
+        })),
       })
     } catch (err) {
       await prisma.meeting.update({
