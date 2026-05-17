@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  slackToken   String?
+  notionToken  String?
+  meetings     Meeting[]
+  createdAt    DateTime  @default(now())
+}
+
+model Meeting {
+  id         String        @id @default(cuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id])
+  botId      String?
+  platform   String
+  title      String?
+  summary    String?
+  transcript String?
+  decisions  String[]
+  status     MeetingStatus @default(PENDING)
+  startedAt  DateTime?
+  endedAt    DateTime?
+  tasks      Task[]
+  createdAt  DateTime      @default(now())
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  meetingId String
+  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  assignee  String
+  content   String
+  deadline  String?
+  priority  Priority @default(MEDIUM)
+  done      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+enum MeetingStatus {
+  PENDING
+  JOINING
+  RECORDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
